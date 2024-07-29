@@ -1,3 +1,4 @@
+import 'package:attendance_management_system_app/screens/user_record_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:attendance_management_system_app/widgets/attendance_radio_button.dart';
@@ -97,7 +98,12 @@ class _UserPanelState extends State<UserPanel> {
             ),
             const SizedBox(height: 20.0),
             ElevatedButton.icon(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.of(context)
+                    .push(MaterialPageRoute(builder: (context) {
+                  return const UserRecordScreen();
+                }));
+              },
               label: Text('Show my record'),
               // icon: Icon(Icons.arrow_forward),
               icon: Icon(Icons.navigate_next),
