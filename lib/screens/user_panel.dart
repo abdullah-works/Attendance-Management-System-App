@@ -1,5 +1,5 @@
 import 'package:attendance_management_system_app/screens/user_record_screen.dart';
-import 'package:flutter/cupertino.dart';
+
 import 'package:flutter/material.dart';
 import 'package:attendance_management_system_app/widgets/attendance_radio_button.dart';
 
@@ -18,10 +18,10 @@ class _UserPanelState extends State<UserPanel> {
       backgroundColor: Colors.white60,
       appBar: AppBar(
         backgroundColor: Colors.blue,
-        title: Text('Student Attendance'),
+        title: const Text('Student Attendance'),
         titleTextStyle: Theme.of(context).textTheme.titleLarge!.copyWith(
               fontWeight: FontWeight.bold,
-              color: Color.fromARGB(255, 235, 234, 234),
+              color: const Color.fromARGB(255, 235, 234, 234),
             ),
       ),
       body: Padding(
@@ -70,20 +70,22 @@ class _UserPanelState extends State<UserPanel> {
                     context: context,
                     builder: (builder) {
                       return AlertDialog(
-                        title: Text('Confirmation'),
-                        content: Text("This can't be undone! Are you sure?"),
+                        title: const Text('Confirmation'),
+                        content:
+                            const Text("This can't be undone! Are you sure?"),
                         actions: [
-                          TextButton(onPressed: () {}, child: Text('Yes')),
+                          TextButton(
+                              onPressed: () {}, child: const Text('Yes')),
                           TextButton(
                               onPressed: () {
                                 Navigator.of(context).pop();
                               },
-                              child: Text('Cancel')),
+                              child: const Text('Cancel')),
                         ],
                       );
                     });
               },
-              child: Text('Submit'),
+              child: const Text('Submit'),
               // label: Text('Submit'),
               // icon: Icon(Icons.done),
             ),
@@ -104,9 +106,9 @@ class _UserPanelState extends State<UserPanel> {
                   return const UserRecordScreen();
                 }));
               },
-              label: Text('Show my record'),
+              label: const Text('Show my record'),
               // icon: Icon(Icons.arrow_forward),
-              icon: Icon(Icons.navigate_next),
+              icon: const Icon(Icons.navigate_next),
               iconAlignment: IconAlignment.end,
             ),
           ],
