@@ -63,6 +63,46 @@ class _UserPanelState extends State<UserPanel> {
             //   label: Text('Submit'),
             //   icon: Icon(Icons.done),
             // ),
+            FilledButton(
+              onPressed: () {
+                showDialog(
+                    context: context,
+                    builder: (builder) {
+                      return AlertDialog(
+                        title: Text('Confirmation'),
+                        content: Text("This can't be undone! Are you sure?"),
+                        actions: [
+                          TextButton(onPressed: () {}, child: Text('Yes')),
+                          TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              child: Text('Cancel')),
+                        ],
+                      );
+                    });
+              },
+              child: Text('Submit'),
+              // label: Text('Submit'),
+              // icon: Icon(Icons.done),
+            ),
+            const SizedBox(height: 20.0),
+            const Text(
+              "Your Attendance Record:",
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                // letterSpacing: 1.5,
+              ),
+            ),
+            const SizedBox(height: 20.0),
+            ElevatedButton.icon(
+              onPressed: () {},
+              label: Text('Show my record'),
+              // icon: Icon(Icons.arrow_forward),
+              icon: Icon(Icons.navigate_next),
+              iconAlignment: IconAlignment.end,
+            ),
           ],
         ),
       ),
