@@ -1,6 +1,6 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
-enum AttendanceOptions { markAttendance, markLeave }
+import 'package:attendance_management_system_app/widgets/attendance_radio_button.dart';
 
 class UserPanel extends StatefulWidget {
   const UserPanel({super.key});
@@ -10,13 +10,18 @@ class UserPanel extends StatefulWidget {
 }
 
 class _UserPanelState extends State<UserPanel> {
-  AttendanceOptions? _character = AttendanceOptions.markLeave;
+  AttendanceOptions? _character;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.amberAccent,
+      backgroundColor: Colors.white60,
       appBar: AppBar(
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: Colors.blue,
+        title: Text('Student Attendance'),
+        titleTextStyle: Theme.of(context).textTheme.titleLarge!.copyWith(
+              fontWeight: FontWeight.bold,
+              color: Color.fromARGB(255, 235, 234, 234),
+            ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -32,57 +37,32 @@ class _UserPanelState extends State<UserPanel> {
               ),
             ),
             const SizedBox(height: 20.0),
-            Card(
-              child: ListTile(
-                title: Text(
-                  'Mark Attendance',
-                  style: _character == AttendanceOptions.markAttendance
-                      ? TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        )
-                      : TextStyle(
-                          fontSize: 16,
-                          // fontWeight: FontWeight.bold,
-                        ),
-                ),
-                leading: Radio<AttendanceOptions?>(
-                  value: AttendanceOptions.markAttendance,
-                  groupValue: _character,
-                  onChanged: (AttendanceOptions? value) {
-                    setState(() {
-                      _character = value;
-                    });
-                  },
-                ),
-                // tileColor: Colors.blue,
-              ),
+            AttendanceRadioButton(
+              text: 'Mark Attendance',
+              value: AttendanceOptions.markAttendance,
+              currentValue: _character,
+              changeValue: (value) {
+                setState(() {
+                  _character = value;
+                });
+              },
             ),
-            Card(
-              child: ListTile(
-                title: Text(
-                  'Mark Leave',
-                  style: _character == AttendanceOptions.markAttendance
-                      ? TextStyle(
-                          fontSize: 16,
-                          // fontWeight: FontWeight.bold,
-                        )
-                      : TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                ),
-                leading: Radio<AttendanceOptions?>(
-                  value: AttendanceOptions.markLeave,
-                  groupValue: _character,
-                  onChanged: (AttendanceOptions? value) {
-                    setState(() {
-                      _character = value;
-                    });
-                  },
-                ),
-              ),
+            AttendanceRadioButton(
+              text: 'Mark Leave',
+              value: AttendanceOptions.markLeave,
+              currentValue: _character,
+              changeValue: (value) {
+                setState(() {
+                  _character = value;
+                });
+              },
             ),
+            const SizedBox(height: 10.0),
+            // FilledButton.icon(
+            //   onPressed: () {},
+            //   label: Text('Submit'),
+            //   icon: Icon(Icons.done),
+            // ),
           ],
         ),
       ),
