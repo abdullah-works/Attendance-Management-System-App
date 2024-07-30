@@ -1,5 +1,7 @@
 import 'package:attendance_management_system_app/screens/login_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class CreateAccountScreen extends StatefulWidget {
   const CreateAccountScreen({super.key});
@@ -170,29 +172,60 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                   ),
                   const SizedBox(height: 12),
                   ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
                       if (formKey.currentState!.validate()) {
                         // Storing valid credentials
+                        try {
+                          FirebaseAuth auth = FirebaseAuth.instance;
 
-                        showDialog(
-                          context: context,
-                          builder: ((context) {
-                            return AlertDialog(
-                              title: const Text('Success'),
-                              // contentPadding: EdgeInsets.all(16),
-                              content: const Text(
-                                  'Account Created! Your information has been saved.'),
-                              actions: [
-                                TextButton(
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                      formKey.currentState!.reset();
-                                    },
-                                    child: const Text('Okay'))
-                              ],
-                            );
-                          }),
-                        );
+                          UserCredential userCredentials =
+                              await auth.createUserWithEmailAndPassword(
+                                  email: email, password: password);
+
+                          if (userCredentials.user != null) {
+                            FirebaseFirestore firebaseFirestore =
+                                FirebaseFirestore.instance;
+
+                            await firebaseFirestore
+                                .collection('users')
+                                .doc(userCredentials.user!.uid)
+                                .set({
+                              'id': userCredentials.user!.uid,
+                              'name': fullName,
+                              'email': email,
+                              'password': password,
+                              'createdOn': DateTime.now(),
+                              'photo': null,
+                            });
+
+                            if (context.mounted) {
+                              showDialog(
+                                context: context,
+                                builder: ((context) {
+                                  return AlertDialog(
+                                    title: const Text('Success'),
+                                    // contentPadding: EdgeInsets.all(16),
+                                    content: const Text(
+                                        'Account Created! Your information has been saved.'),
+                                    actions: [
+                                      TextButton(
+                                          onPressed: () {
+                                            Navigator.pop(context);
+                                            formKey.currentState!.reset();
+                                          },
+                                          child: const Text('Okay'))
+                                    ],
+                                  );
+                                }),
+                              );
+                            }
+                          }
+                        } catch (error) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(error.toString())));
+                          }
+                        }
                       }
                     },
                     style: ElevatedButton.styleFrom(

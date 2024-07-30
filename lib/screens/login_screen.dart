@@ -1,4 +1,8 @@
+import 'dart:js_interop';
+
 import 'package:attendance_management_system_app/screens/create_account_screen.dart';
+import 'package:attendance_management_system_app/screens/user/user_attendance_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -96,16 +100,11 @@ class _LoginScreenState extends State<LoginScreen> {
                           // controller: passwordC,
                           validator: (value) {
                             final returnValue = defaultValidator(value);
-                            // if (returnValue == null) {
-                            //   final bool isPasswordValid = RegExp(
-                            //           r"^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z\d!@#$%&*]{8,}$")
-                            //       .hasMatch(value!);
-                            //   if (isPasswordValid) {
-                            //     password = value;
-                            //     return returnValue;
-                            //   }
-                            //   return 'Please use the above criteria for password';
-                            // }
+                            if (returnValue == null) {
+                              password = value!;
+                              return returnValue;
+                            }
+
                             return returnValue;
                           },
                           obscureText: passHidden,
@@ -137,37 +136,76 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 12),
                   ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
                       if (formKey.currentState!.validate()) {
-                        SnackBar snackBar = const SnackBar(
-                            content: Text('Successfully Logged In'));
+                        try {
+                          FirebaseAuth auth = FirebaseAuth.instance;
+                          // UserCredential userCredentials =
+                          await auth.signInWithEmailAndPassword(
+                              email: email, password: password);
+                          formKey.currentState!.reset();
 
-                        // if account credentials OK
-                        ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                        formKey.currentState!.reset();
+                          SnackBar snackBar = const SnackBar(
+                              content: Text('Successfully Logged In'));
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context)
+                                .showSnackBar(snackBar);
 
-                        // implement scenarios if the password don't match or
-                        // user doesn't exist etc, show using show Dialog
+                            Navigator.of(context).pushReplacement(
+                                MaterialPageRoute(builder: (context) {
+                              return const UserAttendanceScreen();
+                              // return const AdminPanel();
+                            }));
+                          }
+                        } on FirebaseAuthException catch (error) {
+                          if (error.code == 'user-not-found') {
+                            SnackBar snackBar = const SnackBar(
+                                content: Text(
+                                    'No user corresponding to given email'));
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(snackBar);
+                            }
+                            return;
+                          }
+                          if (error.code == 'wrong-password' ||
+                              error.code == 'invalid-credential') {
+                            SnackBar snackBar = const SnackBar(
+                                content: Text(
+                                    'Either email or password entered is invalid'));
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(snackBar);
+                            }
+                            return;
+                          }
+                          SnackBar snackBar =
+                              SnackBar(content: Text(error.code));
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context)
+                                .showSnackBar(snackBar);
+                          }
 
-                        // showDialog(
-                        //   context: context,
-                        //   builder: ((context) {
-                        //     return AlertDialog(
-                        // title: const Text('Success'),
-                        // // contentPadding: EdgeInsets.all(16),
-                        // content: const Text(
-                        //     'Account Logged In.'),
-                        // actions: [
-                        //   TextButton(
-                        //       onPressed: () {
-                        //         Navigator.pop(context);
-                        //         formKey.currentState!.reset();
-                        //       },
-                        //       child: const Text('Okay'))
-                        // ],
-                        //         );
-                        //   }),
-                        // );
+                          // showDialog(
+                          //   context: context,
+                          //   builder: ((context) {
+                          //     return AlertDialog(
+                          // title: const Text('Success'),
+                          // // contentPadding: EdgeInsets.all(16),
+                          // content: const Text(
+                          //     'Account Logged In.'),
+                          // actions: [
+                          //   TextButton(
+                          //       onPressed: () {
+                          //         Navigator.pop(context);
+                          //         formKey.currentState!.reset();
+                          //       },
+                          //       child: const Text('Okay'))
+                          // ],
+                          //         );
+                          //   }),
+                          // );
+                        }
                       }
                     },
                     style: ElevatedButton.styleFrom(
