@@ -88,8 +88,16 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                           // controller: emailC,
                           validator: (value) {
                             final returnValue = defaultValidator(value);
+
                             if (returnValue == null) {
-                              email = value!;
+                              final bool isEmailValid = RegExp(
+                                      r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+                                  .hasMatch(value!);
+                              if (isEmailValid) {
+                                email = value;
+                                return returnValue;
+                              }
+                              return 'Please enter a valid email';
                             }
                             return returnValue;
                           },
@@ -121,7 +129,14 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                           validator: (value) {
                             final returnValue = defaultValidator(value);
                             if (returnValue == null) {
-                              password = value!;
+                              final bool isPasswordValid = RegExp(
+                                      r"^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z\d!@#$%&*]{8,}$")
+                                  .hasMatch(value!);
+                              if (isPasswordValid) {
+                                password = value;
+                                return returnValue;
+                              }
+                              return 'Please use the above criteria for password';
                             }
                             return returnValue;
                           },
@@ -191,6 +206,25 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                       ),
                     ),
                   ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text('Already Registered? Log in'),
+                      TextButton(
+                        onPressed: () {},
+                        iconAlignment: IconAlignment.end,
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.only(
+                            left: 5,
+                          ),
+                          alignment: Alignment.centerLeft,
+                          backgroundColor: Colors.transparent,
+                        ),
+                        child: Text('here'),
+                      )
+                    ],
+                  )
                 ],
               ),
             ),
