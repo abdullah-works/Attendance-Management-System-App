@@ -1,17 +1,16 @@
-import 'package:attendance_management_system_app/screens/login_screen.dart';
+import 'package:attendance_management_system_app/screens/create_account_screen.dart';
 import 'package:flutter/material.dart';
 
-class CreateAccountScreen extends StatefulWidget {
-  const CreateAccountScreen({super.key});
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
 
   @override
-  State<CreateAccountScreen> createState() => _CreateAccountScreenState();
+  State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _CreateAccountScreenState extends State<CreateAccountScreen> {
-  // TextEditingController fullNameC = TextEditingController();
+class _LoginScreenState extends State<LoginScreen> {
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
-  late String fullName, email, password;
+  late String email, password;
   bool passHidden = true;
 
   String? defaultValidator(String? value) {
@@ -30,7 +29,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
       backgroundColor: Colors.greenAccent,
       appBar: AppBar(
         backgroundColor: Colors.blue,
-        title: const Text('Create Account'),
+        title: const Text('Log In'),
         titleTextStyle: Theme.of(context).textTheme.titleLarge!.copyWith(
               fontWeight: FontWeight.bold,
               color: const Color.fromARGB(255, 235, 234, 234),
@@ -54,7 +53,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         const Text(
-                          'My Details',
+                          'Your Credentails',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16.0,
@@ -62,29 +61,6 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                           textAlign: TextAlign.left,
                         ),
                         const SizedBox(height: 20.0),
-                        TextFormField(
-                          // controller: fullNameC,
-                          validator: (value) {
-                            final returnValue = defaultValidator(value);
-                            if (returnValue == null) {
-                              fullName = value!;
-                            }
-                            return returnValue;
-                          },
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                          ),
-                          decoration: const InputDecoration(
-                            hintText: 'Type your full name here',
-                            label: Text(
-                              'Name',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 16.0),
                         TextFormField(
                           // controller: emailC,
                           validator: (value) {
@@ -116,29 +92,20 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                           ),
                         ),
                         const SizedBox(height: 16.0),
-                        const Text(
-                          'Password - minimum 8 characters, should be a combination of (letters and numbers)',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15.0,
-                          ),
-                          textAlign: TextAlign.left,
-                        ),
-                        const SizedBox(height: 16.0),
                         TextFormField(
                           // controller: passwordC,
                           validator: (value) {
                             final returnValue = defaultValidator(value);
-                            if (returnValue == null) {
-                              final bool isPasswordValid = RegExp(
-                                      r"^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z\d!@#$%&*]{8,}$")
-                                  .hasMatch(value!);
-                              if (isPasswordValid) {
-                                password = value;
-                                return returnValue;
-                              }
-                              return 'Please use the above criteria for password';
-                            }
+                            // if (returnValue == null) {
+                            //   final bool isPasswordValid = RegExp(
+                            //           r"^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z\d!@#$%&*]{8,}$")
+                            //       .hasMatch(value!);
+                            //   if (isPasswordValid) {
+                            //     password = value;
+                            //     return returnValue;
+                            //   }
+                            //   return 'Please use the above criteria for password';
+                            // }
                             return returnValue;
                           },
                           obscureText: passHidden,
@@ -172,27 +139,35 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                   ElevatedButton(
                     onPressed: () {
                       if (formKey.currentState!.validate()) {
-                        // Storing valid credentials
+                        SnackBar snackBar = const SnackBar(
+                            content: Text('Successfully Logged In'));
 
-                        showDialog(
-                          context: context,
-                          builder: ((context) {
-                            return AlertDialog(
-                              title: const Text('Success'),
-                              // contentPadding: EdgeInsets.all(16),
-                              content: const Text(
-                                  'Account Created! Your information has been saved.'),
-                              actions: [
-                                TextButton(
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                      formKey.currentState!.reset();
-                                    },
-                                    child: const Text('Okay'))
-                              ],
-                            );
-                          }),
-                        );
+                        // if account credentials OK
+                        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                        formKey.currentState!.reset();
+
+                        // implement scenarios if the password don't match or
+                        // user doesn't exist etc, show using show Dialog
+
+                        // showDialog(
+                        //   context: context,
+                        //   builder: ((context) {
+                        //     return AlertDialog(
+                        // title: const Text('Success'),
+                        // // contentPadding: EdgeInsets.all(16),
+                        // content: const Text(
+                        //     'Account Logged In.'),
+                        // actions: [
+                        //   TextButton(
+                        //       onPressed: () {
+                        //         Navigator.pop(context);
+                        //         formKey.currentState!.reset();
+                        //       },
+                        //       child: const Text('Okay'))
+                        // ],
+                        //         );
+                        //   }),
+                        // );
                       }
                     },
                     style: ElevatedButton.styleFrom(
@@ -201,7 +176,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                         // enabledMouseCursor: MouseCursor.defer,
                         shape: const BeveledRectangleBorder()),
                     child: const Text(
-                      'Create Account',
+                      'Log In',
                       style: TextStyle(
                         color: Colors.white,
                       ),
@@ -211,12 +186,12 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text('Already Registered? Log in'),
+                      const Text('Not Registered yet? Create Account'),
                       TextButton(
                         onPressed: () {
                           Navigator.of(context).pushReplacement(
                               MaterialPageRoute(builder: (context) {
-                            return const LoginScreen();
+                            return const CreateAccountScreen();
                           }));
                         },
                         iconAlignment: IconAlignment.end,
