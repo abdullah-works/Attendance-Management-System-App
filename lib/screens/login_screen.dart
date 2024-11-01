@@ -3,6 +3,7 @@ import 'package:attendance_management_system_app/screens/user_panel.dart';
 import 'package:attendance_management_system_app/utility/validators.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -16,137 +17,88 @@ class _LoginScreenState extends State<LoginScreen> {
   late String email, password;
   bool passHidden = true;
 
-  Widget get emailTextField {
-    return TextFormField(
-      // controller: emailC,
-      validator: (value) {
-        final returnValue = defaultUserInputValidator(value);
-
-        if (returnValue == null) {
-          final bool isEmailValid = RegExp(
-                  r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
-              .hasMatch(value!);
-          if (isEmailValid) {
-            email = value;
-            return returnValue;
-          }
-          return 'Please enter a valid email';
-        }
-        return returnValue;
-      },
-      style: const TextStyle(
-        fontWeight: FontWeight.bold,
-      ),
-      decoration: const InputDecoration(
-        hintText: 'Type your email address here',
-        label: Text(
-          'Email Address',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget get passwordTextField {
-    return TextFormField(
-      // controller: passwordC,
-      validator: (value) {
-        final returnValue = defaultUserInputValidator(value);
-        if (returnValue == null) {
-          password = value!;
-          return returnValue;
-        }
-
-        return returnValue;
-      },
-      obscureText: passHidden,
-      style: const TextStyle(
-        fontWeight: FontWeight.bold,
-      ),
-      decoration: InputDecoration(
-          suffixIcon: IconButton(
-            onPressed: () {
-              setState(() {
-                passHidden = !passHidden;
-              });
-            },
-            icon: (passHidden)
-                ? const Icon(Icons.visibility_off)
-                : const Icon(Icons.visibility),
-          ),
-          label: const Text(
-            'Password',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          hintText: 'Type your password here'),
-    );
-  }
-
-  void Function()? submitCredentials() {
+  void submitCredentials() {
     if (formKey.currentState!.validate()) {
-      signInWithEmail(context);
+      signIn(context);
     }
-    return null;
+    // return null;
   }
 
-  void signInWithEmail(BuildContext context) async {
+  void signIn(BuildContext context) async {
+    showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (builder) {
+          return const PopScope(
+              child: SpinKitFadingCube(
+            color: Colors.white,
+          ));
+        });
     String errorMessage = 'An error occured';
     try {
       FirebaseAuth auth = FirebaseAuth.instance;
-      // UserCredential userCredentials =
       await auth.signInWithEmailAndPassword(email: email, password: password);
+      //     .then((userCredential) {
+      //   if (userCredential.user == null) {
+      //     return;
+      //   }
+      //   print(userCredential.user);
+      //   formKey.currentState!.reset();
+      // });
+
+      formKey.currentState!.reset();
 
       SnackBar snackBar =
           const SnackBar(content: Text('Successfully Logged In'));
-      formKey.currentState!.reset();
+
       if (context.mounted) {
+        Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
 
         Navigator.of(context)
             .pushReplacement(MaterialPageRoute(builder: (context) {
           return const UserPanel();
-          // return const AdminPanel();
         }));
       }
     } on FirebaseAuthException catch (error) {
+      errorMessage = error.code;
       if (error.code == 'user-not-found') {
-        errorMessage = 'No user corresponding to given email';
-        // SnackBar snackBar = const SnackBar(
-        //     content: Text('No user corresponding to given email'));
-        // if (context.mounted) {
-        //   ScaffoldMessenger.of(context).showSnackBar(snackBar);
-        // }
-        // return;
+        errorMessage = 'No user corresponding to given email.';
       }
-      if (error.code == 'wrong-password' ||
-          error.code == 'invalid-credential') {
-        errorMessage = 'Either email or password entered is invalid';
+      if (error.code == 'invalid-credential') {
+        errorMessage = 'The credentials provided are incorrect.';
+      }
+      if (error.code == 'wrong-password') {
+        errorMessage = 'The password entered is incorrect.';
+      }
+
+      // This error message is also necessary, because maybe the user is accessing someone else's email, hence account with their correct password.
+      // In this case, the user will try to change their correct password but won't get a hint on whether, maybe take a look at the email address. As the password is only incorrect for other person account in this case, not specifically for the user own account.
+
+      // if (error.code == 'wrong-password') {
+      //   errorMessage = 'Either email or password entered is invalid';
+      // }
+
+      if (error.code == 'invalid-email') {
+        errorMessage = 'The email entered is in invalid format.';
       }
 
       if (error.code == 'network-request-failed') {
-        errorMessage = 'There is a problem with your internet connection';
+        errorMessage = 'There is a problem with your internet connection.';
       }
-      // SnackBar snackBar = SnackBar(content: Text(error.code));
-      // if (context.mounted) {
-      //   ScaffoldMessenger.of(context).showSnackBar(snackBar);
-      // }
+
       if (context.mounted) {
+        Navigator.of(context).pop();
         showDialog(
           context: context,
           builder: ((context) {
             return AlertDialog(
               title: const Text('Sign In failed'),
-              // contentPadding: EdgeInsets.all(16),
               content: Text(errorMessage),
               actions: [
                 TextButton(
                   onPressed: () {
                     Navigator.pop(context);
-                    formKey.currentState!.reset();
                   },
                   style: TextButton.styleFrom(
                     backgroundColor: Colors.deepPurpleAccent,
@@ -162,99 +114,235 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  Widget get emailInputWidget {
+    return TextFormField(
+      cursorColor: Colors.white,
+      validator: (value) {
+        final returnValue = defaultUserInputValidator(value);
+
+        if (returnValue == null) {
+          final bool isEmailValid = RegExp(
+                  r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+              .hasMatch(value!);
+          if (isEmailValid) {
+            email = value;
+            return returnValue;
+          }
+          return 'Please enter a valid email';
+        }
+        return returnValue;
+      },
+      style: TextStyle(
+        fontWeight: FontWeight.bold,
+        color: Colors.white.withOpacity(0.8),
+      ),
+      decoration: InputDecoration(
+        hintStyle: TextStyle(
+          color: Colors.white.withOpacity(0.6),
+        ),
+        errorStyle: const TextStyle(
+          color: Color.fromARGB(255, 255, 111, 102),
+        ),
+        hintText: 'Type your email address here',
+        label: const Text(
+          'Email Address',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget get passwordInputWidget {
+    return TextFormField(
+      cursorColor: Colors.white,
+
+      // controller: passwordC,
+      validator: (value) {
+        final returnValue = defaultUserInputValidator(value);
+        if (returnValue == null) {
+          password = value!;
+          return returnValue;
+        }
+
+        return returnValue;
+      },
+      obscureText: passHidden,
+      style: TextStyle(
+        fontWeight: FontWeight.bold,
+        color: Colors.white.withOpacity(0.8),
+      ),
+      decoration: InputDecoration(
+          hintStyle: TextStyle(
+            color: Colors.white.withOpacity(0.6),
+          ),
+          errorStyle: const TextStyle(
+            color: Color.fromARGB(255, 255, 111, 102),
+          ),
+          suffixIcon: IconButton(
+            color: Colors.white.withOpacity(0.6),
+            onPressed: () {
+              setState(() {
+                passHidden = !passHidden;
+              });
+            },
+            icon: (passHidden)
+                ? const Icon(Icons.visibility_off)
+                : const Icon(Icons.visibility),
+          ),
+          label: const Text(
+            'Password',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          hintText: 'Type your password here'),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.greenAccent,
+      backgroundColor: Colors.black87,
       appBar: AppBar(
-        backgroundColor: Colors.blue,
-        title: const Text('Log In'),
-        titleTextStyle: Theme.of(context).textTheme.titleLarge!.copyWith(
-              fontWeight: FontWeight.bold,
-              color: const Color.fromARGB(255, 235, 234, 234),
-            ),
-      ),
-      body: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Form(
-            key: formKey,
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white60,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        const Text(
-                          'Your Credentails',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16.0,
-                          ),
-                          textAlign: TextAlign.left,
-                        ),
-                        const SizedBox(height: 20.0),
-                        // user email TextFormField widget for sign in
-                        emailTextField,
-
-                        // install gap widget OR i think, it is OK
-                        const SizedBox(height: 16.0),
-
-                        // user password TextFormField widget for sign in
-                        passwordTextField,
-                        const SizedBox(height: 16.0),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  ElevatedButton(
-                    onPressed: submitCredentials,
-                    style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color.fromARGB(255, 0, 196, 177),
-                        padding: const EdgeInsets.symmetric(vertical: 20.0),
-                        // enabledMouseCursor: MouseCursor.defer,
-                        shape: const BeveledRectangleBorder()),
-                    child: const Text(
-                      'Log In',
-                      style: TextStyle(
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text('Not Registered yet? Create Account'),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pushReplacement(
-                              MaterialPageRoute(builder: (context) {
-                            return const CreateAccountScreen();
-                          }));
-                        },
-                        iconAlignment: IconAlignment.end,
-                        style: TextButton.styleFrom(
-                          padding: const EdgeInsets.only(
-                            left: 5,
-                          ),
-                          alignment: Alignment.centerLeft,
-                          backgroundColor: Colors.transparent,
-                        ),
-                        child: const Text('here'),
-                      )
-                    ],
-                  )
-                ],
+        backgroundColor: Colors.white.withOpacity(0.2),
+        centerTitle: true,
+        titleSpacing: 30,
+        bottom: const PreferredSize(
+          preferredSize: Size.fromHeight(66),
+          child: Center(
+            heightFactor: 3,
+            child: Text(
+              'USER LOG IN',
+              style: TextStyle(
+                fontWeight: FontWeight.w100,
+                color: Colors.white,
+                fontSize: 24,
+                letterSpacing: 2,
+                wordSpacing: 4,
               ),
             ),
-          )),
+          ),
+        ),
+      ),
+      body: Center(
+        child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Form(
+              key: formKey,
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.black87,
+                        boxShadow: const [
+                          // shadows goes from bottom to top, center of the circle or shape to outwards
+                          BoxShadow(color: Colors.white, blurRadius: 2),
+                          // BoxShadow(color: Colors.red, blurRadius: 4),
+                        ],
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          const Text(
+                            'Your Credentails',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16.0,
+                              color: Colors.white,
+                              letterSpacing: 2,
+                            ),
+                            textAlign: TextAlign.left,
+                          ),
+                          const SizedBox(height: 20.0),
+
+                          // TextFormField Widget for user email input
+                          emailInputWidget,
+                          const SizedBox(height: 16.0),
+
+                          // TextFormField Widget for user password input
+                          passwordInputWidget,
+                          const SizedBox(height: 16.0),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 72),
+                    TextButton(
+                      onPressed: submitCredentials,
+                      style: TextButton.styleFrom(
+                          backgroundColor: Colors.white12,
+                          elevation: 1,
+                          shadowColor: Colors.black87,
+                          padding: const EdgeInsets.symmetric(vertical: 20.0),
+                          shape: const BeveledRectangleBorder()),
+                      child: const Text(
+                        'SIGN - IN',
+                        style: TextStyle(
+                          color: Colors.white,
+                          letterSpacing: 1.8,
+                          fontWeight: FontWeight.bold,
+                          wordSpacing: 4,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 56),
+                    const Divider(
+                      color: Colors.white24,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text(
+                          'Not Registered yet? Create Account  ',
+                          style: TextStyle(
+                            color: Colors.white,
+                          ),
+                        ),
+                        SizedBox(
+                          height: 24,
+                          child: TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pushReplacement(
+                                  MaterialPageRoute(builder: (context) {
+                                return const CreateAccountScreen();
+                              }));
+                            },
+                            iconAlignment: IconAlignment.end,
+                            style: TextButton.styleFrom(
+                              alignment: Alignment.centerLeft,
+                              backgroundColor: Colors.black54,
+                              elevation: 1,
+                              shadowColor: Colors.white30,
+                              // padding: const EdgeInsets.only(left: 16),
+                            ),
+                            child: Text(
+                              'here',
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.8),
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 1.2,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Divider(
+                      color: Colors.white24,
+                    ),
+                  ],
+                ),
+              ),
+            )),
+      ),
     );
   }
 }
