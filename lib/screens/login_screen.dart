@@ -1,7 +1,6 @@
-import 'dart:js_interop';
-
 import 'package:attendance_management_system_app/screens/create_account_screen.dart';
-import 'package:attendance_management_system_app/screens/user/user_attendance_screen.dart';
+import 'package:attendance_management_system_app/screens/user_panel.dart';
+import 'package:attendance_management_system_app/utility/validators.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -17,14 +16,150 @@ class _LoginScreenState extends State<LoginScreen> {
   late String email, password;
   bool passHidden = true;
 
-  String? defaultValidator(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Please provide the requested credentials';
-    }
-    if (value.trim().isEmpty) {
-      return 'Only Whitespaces are not accepted';
+  Widget get emailTextField {
+    return TextFormField(
+      // controller: emailC,
+      validator: (value) {
+        final returnValue = defaultUserInputValidator(value);
+
+        if (returnValue == null) {
+          final bool isEmailValid = RegExp(
+                  r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+              .hasMatch(value!);
+          if (isEmailValid) {
+            email = value;
+            return returnValue;
+          }
+          return 'Please enter a valid email';
+        }
+        return returnValue;
+      },
+      style: const TextStyle(
+        fontWeight: FontWeight.bold,
+      ),
+      decoration: const InputDecoration(
+        hintText: 'Type your email address here',
+        label: Text(
+          'Email Address',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget get passwordTextField {
+    return TextFormField(
+      // controller: passwordC,
+      validator: (value) {
+        final returnValue = defaultUserInputValidator(value);
+        if (returnValue == null) {
+          password = value!;
+          return returnValue;
+        }
+
+        return returnValue;
+      },
+      obscureText: passHidden,
+      style: const TextStyle(
+        fontWeight: FontWeight.bold,
+      ),
+      decoration: InputDecoration(
+          suffixIcon: IconButton(
+            onPressed: () {
+              setState(() {
+                passHidden = !passHidden;
+              });
+            },
+            icon: (passHidden)
+                ? const Icon(Icons.visibility_off)
+                : const Icon(Icons.visibility),
+          ),
+          label: const Text(
+            'Password',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          hintText: 'Type your password here'),
+    );
+  }
+
+  void Function()? submitCredentials() {
+    if (formKey.currentState!.validate()) {
+      signInWithEmail(context);
     }
     return null;
+  }
+
+  void signInWithEmail(BuildContext context) async {
+    String errorMessage = 'An error occured';
+    try {
+      FirebaseAuth auth = FirebaseAuth.instance;
+      // UserCredential userCredentials =
+      await auth.signInWithEmailAndPassword(email: email, password: password);
+
+      SnackBar snackBar =
+          const SnackBar(content: Text('Successfully Logged In'));
+      formKey.currentState!.reset();
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+
+        Navigator.of(context)
+            .pushReplacement(MaterialPageRoute(builder: (context) {
+          return const UserPanel();
+          // return const AdminPanel();
+        }));
+      }
+    } on FirebaseAuthException catch (error) {
+      if (error.code == 'user-not-found') {
+        errorMessage = 'No user corresponding to given email';
+        // SnackBar snackBar = const SnackBar(
+        //     content: Text('No user corresponding to given email'));
+        // if (context.mounted) {
+        //   ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        // }
+        // return;
+      }
+      if (error.code == 'wrong-password' ||
+          error.code == 'invalid-credential') {
+        errorMessage = 'Either email or password entered is invalid';
+      }
+
+      if (error.code == 'network-request-failed') {
+        errorMessage = 'There is a problem with your internet connection';
+      }
+      // SnackBar snackBar = SnackBar(content: Text(error.code));
+      // if (context.mounted) {
+      //   ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      // }
+      if (context.mounted) {
+        showDialog(
+          context: context,
+          builder: ((context) {
+            return AlertDialog(
+              title: const Text('Sign In failed'),
+              // contentPadding: EdgeInsets.all(16),
+              content: Text(errorMessage),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    formKey.currentState!.reset();
+                  },
+                  style: TextButton.styleFrom(
+                    backgroundColor: Colors.deepPurpleAccent,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: const Text('Okay'),
+                ),
+              ],
+            );
+          }),
+        );
+      }
+    }
   }
 
   @override
@@ -65,149 +200,21 @@ class _LoginScreenState extends State<LoginScreen> {
                           textAlign: TextAlign.left,
                         ),
                         const SizedBox(height: 20.0),
-                        TextFormField(
-                          // controller: emailC,
-                          validator: (value) {
-                            final returnValue = defaultValidator(value);
+                        // user email TextFormField widget for sign in
+                        emailTextField,
 
-                            if (returnValue == null) {
-                              final bool isEmailValid = RegExp(
-                                      r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
-                                  .hasMatch(value!);
-                              if (isEmailValid) {
-                                email = value;
-                                return returnValue;
-                              }
-                              return 'Please enter a valid email';
-                            }
-                            return returnValue;
-                          },
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                          ),
-                          decoration: const InputDecoration(
-                            hintText: 'Type your email address here',
-                            label: Text(
-                              'Email Address',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
+                        // install gap widget OR i think, it is OK
                         const SizedBox(height: 16.0),
-                        TextFormField(
-                          // controller: passwordC,
-                          validator: (value) {
-                            final returnValue = defaultValidator(value);
-                            if (returnValue == null) {
-                              password = value!;
-                              return returnValue;
-                            }
 
-                            return returnValue;
-                          },
-                          obscureText: passHidden,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                          ),
-                          decoration: InputDecoration(
-                              suffixIcon: IconButton(
-                                onPressed: () {
-                                  setState(() {
-                                    passHidden = !passHidden;
-                                  });
-                                },
-                                icon: (passHidden)
-                                    ? const Icon(Icons.visibility_off)
-                                    : const Icon(Icons.visibility),
-                              ),
-                              label: const Text(
-                                'Password',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              hintText: 'Type your password here'),
-                        ),
+                        // user password TextFormField widget for sign in
+                        passwordTextField,
                         const SizedBox(height: 16.0),
                       ],
                     ),
                   ),
                   const SizedBox(height: 12),
                   ElevatedButton(
-                    onPressed: () async {
-                      if (formKey.currentState!.validate()) {
-                        try {
-                          FirebaseAuth auth = FirebaseAuth.instance;
-                          // UserCredential userCredentials =
-                          await auth.signInWithEmailAndPassword(
-                              email: email, password: password);
-                          formKey.currentState!.reset();
-
-                          SnackBar snackBar = const SnackBar(
-                              content: Text('Successfully Logged In'));
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context)
-                                .showSnackBar(snackBar);
-
-                            Navigator.of(context).pushReplacement(
-                                MaterialPageRoute(builder: (context) {
-                              return const UserAttendanceScreen();
-                              // return const AdminPanel();
-                            }));
-                          }
-                        } on FirebaseAuthException catch (error) {
-                          if (error.code == 'user-not-found') {
-                            SnackBar snackBar = const SnackBar(
-                                content: Text(
-                                    'No user corresponding to given email'));
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context)
-                                  .showSnackBar(snackBar);
-                            }
-                            return;
-                          }
-                          if (error.code == 'wrong-password' ||
-                              error.code == 'invalid-credential') {
-                            SnackBar snackBar = const SnackBar(
-                                content: Text(
-                                    'Either email or password entered is invalid'));
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context)
-                                  .showSnackBar(snackBar);
-                            }
-                            return;
-                          }
-                          SnackBar snackBar =
-                              SnackBar(content: Text(error.code));
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context)
-                                .showSnackBar(snackBar);
-                          }
-
-                          // showDialog(
-                          //   context: context,
-                          //   builder: ((context) {
-                          //     return AlertDialog(
-                          // title: const Text('Success'),
-                          // // contentPadding: EdgeInsets.all(16),
-                          // content: const Text(
-                          //     'Account Logged In.'),
-                          // actions: [
-                          //   TextButton(
-                          //       onPressed: () {
-                          //         Navigator.pop(context);
-                          //         formKey.currentState!.reset();
-                          //       },
-                          //       child: const Text('Okay'))
-                          // ],
-                          //         );
-                          //   }),
-                          // );
-                        }
-                      }
-                    },
+                    onPressed: submitCredentials,
                     style: ElevatedButton.styleFrom(
                         backgroundColor: const Color.fromARGB(255, 0, 196, 177),
                         padding: const EdgeInsets.symmetric(vertical: 20.0),

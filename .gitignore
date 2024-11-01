@@ -43,6 +43,6 @@ app.*.map.json
 /android/app/release
 
 # By User
-/android
-/web
+# /android
+# /web
 /windows
