@@ -22,21 +22,24 @@ Future<bool> checkInternetConnection(BuildContext context) async {
 
   if (!hasInternet) {
     final materialBanner = MaterialBanner(
-      contentTextStyle: ThemeData.dark().textTheme.bodyMedium!.copyWith(
-            // color: Colors.black54,
-            color:const Color.fromARGB(255, 255, 111, 102),
-
-            fontWeight: FontWeight.bold,
-          ),
       backgroundColor: Colors.black54,
       onVisible: () {
         Timer(const Duration(seconds: 3), () {
-          ScaffoldMessenger.of(context).clearMaterialBanners();
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).clearMaterialBanners();
+          }
         });
       },
-      content: const Text(
-        'No Internet Connection',
-        textAlign: TextAlign.center,
+      content: TextButton.icon(
+        onPressed: () {},
+        icon: const Icon(Icons.cloud_off_rounded),
+        label: const Text(
+          'No Internet Connection',
+          textAlign: TextAlign.center,
+        ),
+        style: TextButton.styleFrom(
+            foregroundColor: const Color.fromARGB(255, 255, 111, 102),
+            textStyle: const TextStyle(fontWeight: FontWeight.bold)),
       ),
       actions: [
         // because it would not let me create a MaterialBanner without any Action widget present

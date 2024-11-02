@@ -1,6 +1,7 @@
 import 'package:attendance_management_system_app/screens/create_account_screen.dart';
 import 'package:attendance_management_system_app/screens/user_panel.dart';
 import 'package:attendance_management_system_app/utility/helper_functions.dart';
+import 'package:attendance_management_system_app/widgets/email_input_field.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +16,7 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  late TextEditingController emailC;
   late String email, password;
   bool passHidden = true;
 
@@ -45,6 +47,8 @@ class _LoginScreenState extends State<LoginScreen> {
     FirebaseAuth auth = FirebaseAuth.instance;
     User? user = auth.currentUser;
 
+    email = emailC.text.trim();
+
     try {
       await auth.signInWithEmailAndPassword(email: email, password: password);
       //     .then((userCredential) {
@@ -60,7 +64,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
         await firebaseFirestore
             .collection("admin")
-            .where('email', isEqualTo: email.trim())
+            .where('email', isEqualTo: email)
             .get()
             .then(
           (querySnapshot) {
@@ -141,47 +145,6 @@ class _LoginScreenState extends State<LoginScreen> {
     // }
   }
 
-  Widget get emailInputWidget {
-    return TextFormField(
-      cursorColor: Colors.white,
-      validator: (value) {
-        final returnValue = defaultUserInputValidator(value);
-
-        if (returnValue == null) {
-          final bool isEmailValid = RegExp(
-                  r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
-              .hasMatch(value!);
-          if (isEmailValid) {
-            email = value.trim();
-            return returnValue;
-          }
-          return 'Please enter a valid email';
-        }
-        return returnValue;
-      },
-      style: TextStyle(
-        fontWeight: FontWeight.bold,
-        color: Colors.white.withOpacity(0.8),
-      ),
-      decoration: InputDecoration(
-        hintStyle: TextStyle(
-          color: Colors.white.withOpacity(0.6),
-        ),
-        errorStyle: const TextStyle(
-          color: Color.fromARGB(255, 255, 111, 102),
-        ),
-        hintText: 'Type your email address here',
-        label: const Text(
-          'Email Address',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget get passwordInputWidget {
     return TextFormField(
       cursorColor: Colors.white,
@@ -231,6 +194,18 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   @override
+  void initState() {
+    emailC = TextEditingController();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    emailC.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black87,
@@ -260,113 +235,114 @@ class _LoginScreenState extends State<LoginScreen> {
             padding: const EdgeInsets.all(16),
             child: Form(
               key: formKey,
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.black87,
-                        boxShadow: const [
-                          // shadows goes from bottom to top, center of the circle or shape to outwards
-                          BoxShadow(color: Colors.white, blurRadius: 2),
-                          // BoxShadow(color: Colors.red, blurRadius: 4),
-                        ],
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          const Text(
-                            'Your Credentails',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16.0,
-                              color: Colors.white,
-                              letterSpacing: 2,
-                            ),
-                            textAlign: TextAlign.left,
-                          ),
-                          const SizedBox(height: 20.0),
-
-                          // TextFormField Widget for user email input
-                          emailInputWidget,
-                          const SizedBox(height: 16.0),
-
-                          // TextFormField Widget for user password input
-                          passwordInputWidget,
-                          const SizedBox(height: 16.0),
-                        ],
-                      ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.black87,
+                      boxShadow: const [
+                        // shadows goes from bottom to top, center of the circle or shape to outwards
+                        BoxShadow(color: Colors.white, blurRadius: 2),
+                        // BoxShadow(color: Colors.red, blurRadius: 4),
+                      ],
+                      borderRadius: BorderRadius.circular(4),
                     ),
-                    const SizedBox(height: 72),
-                    TextButton(
-                      onPressed: submitCredentials,
-                      style: TextButton.styleFrom(
-                          backgroundColor: Colors.white12,
-                          elevation: 1,
-                          shadowColor: Colors.black87,
-                          padding: const EdgeInsets.symmetric(vertical: 20.0),
-                          shape: const BeveledRectangleBorder()),
-                      child: const Text(
-                        'SIGN - IN',
-                        style: TextStyle(
-                          color: Colors.white,
-                          letterSpacing: 1.8,
-                          fontWeight: FontWeight.bold,
-                          wordSpacing: 4,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 56),
-                    const Divider(
-                      color: Colors.white24,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         const Text(
-                          'Not Registered yet? Create Account  ',
+                          'Your Credentails',
                           style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16.0,
                             color: Colors.white,
+                            letterSpacing: 2,
                           ),
+                          textAlign: TextAlign.left,
                         ),
-                        SizedBox(
-                          height: 24,
-                          child: TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pushReplacement(
-                                  MaterialPageRoute(builder: (context) {
-                                return const CreateAccountScreen();
-                              }));
-                            },
-                            iconAlignment: IconAlignment.end,
-                            style: TextButton.styleFrom(
-                              alignment: Alignment.centerLeft,
-                              backgroundColor: Colors.black54,
-                              elevation: 1,
-                              shadowColor: Colors.white30,
-                              // padding: const EdgeInsets.only(left: 16),
-                            ),
-                            child: Text(
-                              'here',
-                              style: TextStyle(
-                                color: Colors.white.withOpacity(0.8),
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 1.2,
-                                fontSize: 13,
-                              ),
-                            ),
-                          ),
-                        ),
+                        const SizedBox(height: 20.0),
+
+                        // TextFormField modified widget class for user email input
+                        EmailInputField(controller: emailC),
+                        const SizedBox(height: 16.0),
+
+                        // TextFormField Widget for user password input
+                        passwordInputWidget,
+                        const SizedBox(height: 16.0),
                       ],
                     ),
-                    const Divider(
-                      color: Colors.white24,
+                  ),
+                  const SizedBox(height: 72),
+                  TextButton(
+                    onPressed: submitCredentials,
+                    style: TextButton.styleFrom(
+                        backgroundColor: Colors.white12,
+                        elevation: 1,
+                        shadowColor: Colors.black87,
+                        padding: const EdgeInsets.symmetric(vertical: 20.0),
+                        shape: const BeveledRectangleBorder()),
+                    child: const Text(
+                      'SIGN - IN',
+                      style: TextStyle(
+                        color: Colors.white,
+                        letterSpacing: 1.8,
+                        fontWeight: FontWeight.bold,
+                        wordSpacing: 4,
+                      ),
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: 56),
+                  const Divider(
+                    color: Colors.white24,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text(
+                        'Not Registered yet? Create Account  ',
+                        style: TextStyle(
+                          color: Colors.white,
+                        ),
+                      ),
+                      SizedBox(
+                        height: 24,
+                        child: TextButton(
+                          onPressed: () {
+                            ScaffoldMessenger.of(context)
+                                .clearMaterialBanners();
+                            Navigator.of(context).pushReplacement(
+                                MaterialPageRoute(builder: (context) {
+                              return const CreateAccountScreen();
+                            }));
+                          },
+                          iconAlignment: IconAlignment.end,
+                          style: TextButton.styleFrom(
+                            alignment: Alignment.centerLeft,
+                            backgroundColor: Colors.black54,
+                            elevation: 1,
+                            shadowColor: Colors.white30,
+                            // padding: const EdgeInsets.only(left: 16),
+                          ),
+                          child: Text(
+                            'here',
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.8),
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1.2,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Divider(
+                    color: Colors.white24,
+                  ),
+                ],
               ),
             )),
       ),

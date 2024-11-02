@@ -1,4 +1,4 @@
-import 'package:attendance_management_system_app/screens/login_screen.dart';
+import 'package:attendance_management_system_app/screens/create_account_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:attendance_management_system_app/screens/splash_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -29,7 +29,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       // home: SplashScreen(),
-      home: LoginScreen(),
+      home: CreateAccountScreen(),
     );
   }
 }
