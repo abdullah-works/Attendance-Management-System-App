@@ -1,6 +1,7 @@
 import 'package:attendance_management_system_app/screens/create_account_screen.dart';
 import 'package:attendance_management_system_app/screens/user_panel.dart';
-import 'package:attendance_management_system_app/utility/validators.dart';
+import 'package:attendance_management_system_app/utility/helper_functions.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -25,6 +26,8 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void signIn(BuildContext context) async {
+    Widget activeScreen = const UserPanel();
+    String errorMessage = 'An error occured';
     showDialog(
         barrierDismissible: false,
         context: context,
@@ -34,9 +37,15 @@ class _LoginScreenState extends State<LoginScreen> {
             color: Colors.white,
           ));
         });
-    String errorMessage = 'An error occured';
+
+    final isConnected = await checkInternetConnection(context);
+    if (!isConnected) {
+      return;
+    }
+    FirebaseAuth auth = FirebaseAuth.instance;
+    User? user = auth.currentUser;
+
     try {
-      FirebaseAuth auth = FirebaseAuth.instance;
       await auth.signInWithEmailAndPassword(email: email, password: password);
       //     .then((userCredential) {
       //   if (userCredential.user == null) {
@@ -46,22 +55,27 @@ class _LoginScreenState extends State<LoginScreen> {
       //   formKey.currentState!.reset();
       // });
 
-      formKey.currentState!.reset();
+      if (user != null) {
+        FirebaseFirestore firebaseFirestore = FirebaseFirestore.instance;
 
-      SnackBar snackBar =
-          const SnackBar(content: Text('Successfully Logged In'));
-
-      if (context.mounted) {
-        Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
-
-        Navigator.of(context)
-            .pushReplacement(MaterialPageRoute(builder: (context) {
-          return const UserPanel();
-        }));
+        await firebaseFirestore
+            .collection("admin")
+            .where('email', isEqualTo: email.trim())
+            .get()
+            .then(
+          (querySnapshot) {
+            if (querySnapshot.size == 1) {
+              // means the email is present among the ADMIN list
+              // activeScreen = const AdminPanel();
+              // will switch to the admin panel when available
+              activeScreen = const UserPanel();
+            }
+          },
+          // onError: (e) => print("Error completing: $e"),
+        );
       }
     } on FirebaseAuthException catch (error) {
-      errorMessage = error.code;
+      errorMessage = error.message.toString();
       if (error.code == 'user-not-found') {
         errorMessage = 'No user corresponding to given email.';
       }
@@ -100,10 +114,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   onPressed: () {
                     Navigator.pop(context);
                   },
-                  style: TextButton.styleFrom(
-                    backgroundColor: Colors.deepPurpleAccent,
-                    foregroundColor: Colors.white,
-                  ),
                   child: const Text('Okay'),
                 ),
               ],
@@ -111,7 +121,24 @@ class _LoginScreenState extends State<LoginScreen> {
           }),
         );
       }
+      return;
     }
+
+    // here means the TRY block was completed and no error was thrown, otherwise, return would terminate the function from there.
+    // if (user != null) {
+    formKey.currentState!.reset();
+    SnackBar snackBar = const SnackBar(content: Text('Successfully Logged In'));
+
+    if (context.mounted) {
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+
+      Navigator.of(context)
+          .pushReplacement(MaterialPageRoute(builder: (context) {
+        return activeScreen;
+      }));
+    }
+    // }
   }
 
   Widget get emailInputWidget {
@@ -125,7 +152,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
               .hasMatch(value!);
           if (isEmailValid) {
-            email = value;
+            email = value.trim();
             return returnValue;
           }
           return 'Please enter a valid email';
