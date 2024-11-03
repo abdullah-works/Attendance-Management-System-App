@@ -12,6 +12,7 @@ class UserPanel extends StatefulWidget {
 
 class _UserPanelState extends State<UserPanel> {
   AttendanceOptions? _character;
+  bool isAttendanceSubmitted = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,12 +30,54 @@ class _UserPanelState extends State<UserPanel> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              "Today's Attendance:",
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                // letterSpacing: 1.5,
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 10),
+              decoration: const BoxDecoration(
+                color: Colors.green,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(10),
+                  topRight: Radius.circular(10),
+                ),
+              ),
+              child: const Text(
+                'Attendance for today',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 10),
+              decoration: BoxDecoration(
+                color:
+                    (isAttendanceSubmitted) ? Colors.blue : Colors.red.shade700,
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(10),
+                  bottomRight: Radius.circular(10),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    (isAttendanceSubmitted) ? 'Done' : 'Not submitted',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  if (isAttendanceSubmitted)
+                    const Icon(
+                      Icons.cloud_done,
+                      color: Colors.white,
+                    ),
+                ],
               ),
             ),
             const SizedBox(height: 20.0),
@@ -65,26 +108,34 @@ class _UserPanelState extends State<UserPanel> {
             //   icon: Icon(Icons.done),
             // ),
             FilledButton(
-              onPressed: () {
-                showDialog(
-                    context: context,
-                    builder: (builder) {
-                      return AlertDialog(
-                        title: const Text('Confirmation'),
-                        content:
-                            const Text("This can't be undone! Are you sure?"),
-                        actions: [
-                          TextButton(
-                              onPressed: () {}, child: const Text('Yes')),
-                          TextButton(
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                              child: const Text('Cancel')),
-                        ],
-                      );
-                    });
-              },
+              onPressed: (_character == null)
+                  ? null
+                  : () {
+                      showDialog(
+                          context: context,
+                          builder: (builder) {
+                            return AlertDialog(
+                              title: const Text('Confirmation'),
+                              content: const Text(
+                                  "This can't be undone! Are you sure?"),
+                              actions: [
+                                TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                      setState(() {
+                                        isAttendanceSubmitted = true;
+                                      });
+                                    },
+                                    child: const Text('Yes')),
+                                TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: const Text('Cancel')),
+                              ],
+                            );
+                          });
+                    },
               child: const Text('Submit'),
               // label: Text('Submit'),
               // icon: Icon(Icons.done),
