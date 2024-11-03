@@ -1,7 +1,6 @@
 import 'package:attendance_management_system_app/screens/user_record_screen.dart';
 
 import 'package:flutter/material.dart';
-import 'package:attendance_management_system_app/widgets/attendance_radio_button.dart';
 
 class UserPanel extends StatefulWidget {
   const UserPanel({super.key});
@@ -11,7 +10,6 @@ class UserPanel extends StatefulWidget {
 }
 
 class _UserPanelState extends State<UserPanel> {
-  AttendanceOptions? _character;
   String? selectedAttendance;
   bool isValueSelected = false;
   bool isAttendanceSubmitted = false;
@@ -133,27 +131,6 @@ class _UserPanelState extends State<UserPanel> {
                   ).toList()),
             ),
             const SizedBox(height: 20.0),
-            AttendanceRadioButton(
-              text: 'Mark Attendance',
-              value: AttendanceOptions.markAttendance,
-              currentValue: _character,
-              changeValue: (value) {
-                setState(() {
-                  _character = value;
-                });
-              },
-            ),
-            AttendanceRadioButton(
-              text: 'Mark Leave',
-              value: AttendanceOptions.markLeave,
-              currentValue: _character,
-              changeValue: (value) {
-                setState(() {
-                  _character = value;
-                });
-              },
-            ),
-            const SizedBox(height: 10.0),
             FilledButton(
               onPressed: () {
                 if (isValueSelected == false) {
