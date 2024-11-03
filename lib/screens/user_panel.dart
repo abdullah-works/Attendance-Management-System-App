@@ -12,6 +12,8 @@ class UserPanel extends StatefulWidget {
 
 class _UserPanelState extends State<UserPanel> {
   AttendanceOptions? _character;
+  String? selectedAttendance;
+  bool isValueSelected = false;
   bool isAttendanceSubmitted = false;
   @override
   Widget build(BuildContext context) {
@@ -81,6 +83,56 @@ class _UserPanelState extends State<UserPanel> {
               ),
             ),
             const SizedBox(height: 20.0),
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: Colors.white38,
+                ),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: DropdownButton(
+                  dropdownColor: Colors.white,
+                  style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                        color: const Color.fromARGB(255, 8, 85, 148),
+                      ),
+                  underline: const SizedBox.shrink(),
+                  hint: const Text('Choose Attendance Status'),
+                  value: isAttendanceSubmitted
+                      ? null
+                      : selectedAttendance, // in order for the [disabledHint] to display, the [value] should also be null as well as [onChanged]
+                  isExpanded: true,
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  borderRadius: BorderRadius.circular(10),
+                  disabledHint: Text(
+                    '$selectedAttendance (submitted)',
+                    style: const TextStyle(
+                        color: Colors.black45, fontWeight: FontWeight.bold),
+                  ),
+                  onChanged: (isAttendanceSubmitted)
+                      ? null
+                      : (String? value) {
+                          setState(() {
+                            if (value == null) {
+                              return;
+                            }
+                            selectedAttendance = value;
+                            isValueSelected = true;
+                          });
+                        },
+                  items: [
+                    'Present',
+                    'Absent',
+                    'Leave',
+                  ].map(
+                    (String attendanceItem) {
+                      return DropdownMenuItem(
+                        value: attendanceItem,
+                        child: Text(attendanceItem),
+                      );
+                    },
+                  ).toList()),
+            ),
+            const SizedBox(height: 20.0),
             AttendanceRadioButton(
               text: 'Mark Attendance',
               value: AttendanceOptions.markAttendance,
@@ -102,40 +154,42 @@ class _UserPanelState extends State<UserPanel> {
               },
             ),
             const SizedBox(height: 10.0),
-            // FilledButton.icon(
-            //   onPressed: () {},
-            //   label: Text('Submit'),
-            //   icon: Icon(Icons.done),
-            // ),
             FilledButton(
-              onPressed: (_character == null)
-                  ? null
-                  : () {
-                      showDialog(
-                          context: context,
-                          builder: (builder) {
-                            return AlertDialog(
-                              title: const Text('Confirmation'),
-                              content: const Text(
-                                  "This can't be undone! Are you sure?"),
-                              actions: [
-                                TextButton(
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                      setState(() {
-                                        isAttendanceSubmitted = true;
-                                      });
-                                    },
-                                    child: const Text('Yes')),
-                                TextButton(
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                    child: const Text('Cancel')),
-                              ],
-                            );
-                          });
-                    },
+              onPressed: () {
+                if (isValueSelected == false) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Please select a value for attendance.'),
+                    ),
+                  );
+                  return;
+                }
+                showDialog(
+                  context: context,
+                  builder: (builder) {
+                    return AlertDialog(
+                      title: const Text('Confirmation'),
+                      content:
+                          const Text("This can't be undone! Are you sure?"),
+                      actions: [
+                        TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              setState(() {
+                                isAttendanceSubmitted = true;
+                              });
+                            },
+                            child: const Text('Yes')),
+                        TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: const Text('Cancel')),
+                      ],
+                    );
+                  },
+                );
+              },
               child: const Text('Submit'),
               // label: Text('Submit'),
               // icon: Icon(Icons.done),
