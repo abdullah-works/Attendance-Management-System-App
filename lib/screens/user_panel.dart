@@ -32,6 +32,23 @@ class _UserPanelState extends State<UserPanel> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            const SizedBox(height: 16),
+            Center(
+              child: CircleAvatar(
+                radius: 50,
+                backgroundColor: Colors.white60,
+                child: CircleAvatar(
+                  radius: 48,
+                  backgroundColor: Colors.black.withOpacity(0.8),
+                  child: const Icon(
+                    Icons.person,
+                    size: 72,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 32),
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
