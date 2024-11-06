@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:attendance_management_system_app/data/data_store.dart';
 import 'package:attendance_management_system_app/widgets/attendance_radio_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class UserRecordScreen extends StatelessWidget {
   const UserRecordScreen({super.key});
@@ -15,13 +16,15 @@ class UserRecordScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black.withOpacity(0.80),
       appBar: AppBar(
         title: const Text('Attendance Record'),
         titleTextStyle: Theme.of(context).textTheme.titleLarge!.copyWith(
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w200,
               color: const Color.fromARGB(255, 235, 234, 234),
+              letterSpacing: 0.8,
             ),
-        backgroundColor: Colors.blue,
+        backgroundColor: Colors.black87,
         foregroundColor: Colors.white,
       ),
       body: Padding(
@@ -29,7 +32,6 @@ class UserRecordScreen extends StatelessWidget {
         child: FutureBuilder(
           future: getAttendanceData(),
           builder: (context, snapshot) {
-            // just for fun - for now, will change later when data is dynamic
             if (snapshot.hasData) {
               final snapshotData = snapshot.data;
               return ListView.builder(
@@ -38,30 +40,44 @@ class UserRecordScreen extends StatelessWidget {
                     final attendanceItem = attendanceData[index];
                     final attendance = attendanceItem.attendanceStatus;
                     return Card(
-                      clipBehavior: Clip.antiAlias,
-                      // surfaceTintColor: Colors.blue,
+                      shadowColor: Colors.white,
+                      elevation: 2,
+                      clipBehavior: Clip.antiAliasWithSaveLayer,
                       child: ListTile(
-                        leading: const Icon(Icons.person),
+                        leading: Icon(
+                          attendance == AttendanceOptions.markAttendance
+                              ? Icons.done
+                              : Icons.cancel,
+                          color: Colors.white70,
+                        ),
                         title: attendance == AttendanceOptions.markAttendance
-                            ? const Text('Present')
-                            : const Text('On Leave'),
-                        subtitle: Text(attendanceItem.attendanceDate
+                            ? const Text('PRESENT')
+                            : const Text('LEAVE'),
+                        trailing: Text(attendanceItem.attendanceDate
                             .toString()
                             .substring(0, 10)),
-                        subtitleTextStyle: Theme.of(context)
-                            .textTheme
-                            .bodyMedium!
-                            .copyWith(fontWeight: FontWeight.bold),
+                        leadingAndTrailingTextStyle:
+                            Theme.of(context).textTheme.labelSmall!.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
                         tileColor:
                             attendance == AttendanceOptions.markAttendance
-                                ? Colors.green.shade300
-                                : Colors.red.shade300,
+                                ? Colors.green.shade600
+                                : Colors.red.shade700,
+                        titleTextStyle:
+                            Theme.of(context).textTheme.titleMedium!.copyWith(
+                                  color: Colors.white,
+                                  letterSpacing: 0.8,
+                                ),
                       ),
                     );
                   });
             } else {
               return const Center(
-                child: CircularProgressIndicator(),
+                child: SpinKitFadingCircle(
+                  color: Colors.white,
+                ),
               );
             }
           },
