@@ -1,26 +1,28 @@
 import 'dart:async';
 
 import 'package:attendance_management_system_app/data/data_store.dart';
-import 'package:attendance_management_system_app/widgets/attendance_radio_button.dart';
+import 'package:attendance_management_system_app/models/attendance_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class UserRecordScreen extends StatelessWidget {
   const UserRecordScreen({super.key});
 
-  Future<List<AttendanceValue>> getAttendanceData() async {
-    await Future.delayed(const Duration(seconds: 3));
-    return attendanceData;
+  Future<List<Attendance>> getAttendanceData() async {
+    await Future.delayed(const Duration(milliseconds: 1500));
+    return userAttendanceList;
   }
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final height = MediaQuery.of(context).size.height;
     return Scaffold(
       backgroundColor: Colors.black.withOpacity(0.80),
       appBar: AppBar(
         title: const Text('Attendance Record'),
-        titleTextStyle: Theme.of(context).textTheme.titleLarge!.copyWith(
-              fontWeight: FontWeight.w200,
+        titleTextStyle: Theme.of(context).textTheme.titleMedium!.copyWith(
+              fontWeight: FontWeight.bold,
               color: const Color.fromARGB(255, 235, 234, 234),
               letterSpacing: 0.8,
             ),
@@ -37,38 +39,42 @@ class UserRecordScreen extends StatelessWidget {
               return ListView.builder(
                   itemCount: snapshotData!.length,
                   itemBuilder: (context, index) {
-                    final attendanceItem = attendanceData[index];
-                    final attendance = attendanceItem.attendanceStatus;
+                    final attendanceItem = snapshotData[index];
                     return Card(
                       shadowColor: Colors.white,
                       elevation: 2,
                       clipBehavior: Clip.antiAliasWithSaveLayer,
                       child: ListTile(
+                        minTileHeight: height * 0.05,
+                        minVerticalPadding: 4,
                         leading: Icon(
-                          attendance == AttendanceOptions.markAttendance
+                          attendanceItem.attendanceStatus == 'Present'
                               ? Icons.done
                               : Icons.cancel,
+                          size: height * 0.025,
                           color: Colors.white70,
                         ),
-                        title: attendance == AttendanceOptions.markAttendance
-                            ? const Text('PRESENT')
-                            : const Text('LEAVE'),
-                        trailing: Text(attendanceItem.attendanceDate
-                            .toString()
-                            .substring(0, 10)),
+                        title: Text(
+                          attendanceItem.attendanceStatus!,
+                        ),
+                        trailing: Text(
+                          attendanceItem.formattedDate,
+                        ),
                         leadingAndTrailingTextStyle:
                             Theme.of(context).textTheme.labelSmall!.copyWith(
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white,
+                                  fontSize: width * 0.025,
                                 ),
-                        tileColor:
-                            attendance == AttendanceOptions.markAttendance
-                                ? Colors.green.shade600
-                                : Colors.red.shade700,
+                        tileColor: attendanceItem.attendanceStatus == 'Present'
+                            ? Colors.green.shade600
+                            : Colors.red.shade700,
                         titleTextStyle:
                             Theme.of(context).textTheme.titleMedium!.copyWith(
                                   color: Colors.white,
                                   letterSpacing: 0.8,
+                                  // fontSize: aspectRatio * 20,
+                                  fontSize: width * 0.03,
                                 ),
                       ),
                     );
