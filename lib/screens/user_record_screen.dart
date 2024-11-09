@@ -20,6 +20,11 @@ class UserRecordScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.black.withOpacity(0.80),
       appBar: AppBar(
+        leading: IconButton.outlined(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            icon: const Icon(Icons.arrow_back_rounded)),
         title: const Text('Attendance Record'),
         titleTextStyle: Theme.of(context).textTheme.titleMedium!.copyWith(
               fontWeight: FontWeight.bold,
@@ -41,11 +46,12 @@ class UserRecordScreen extends StatelessWidget {
                   itemBuilder: (context, index) {
                     final attendanceItem = snapshotData[index];
                     return Card(
+                      margin: const EdgeInsets.symmetric(vertical: 2),
                       shadowColor: Colors.white,
                       elevation: 2,
                       clipBehavior: Clip.antiAliasWithSaveLayer,
                       child: ListTile(
-                        minTileHeight: height * 0.05,
+                        minTileHeight: height * 0.06,
                         minVerticalPadding: 4,
                         leading: Icon(
                           attendanceItem.attendanceStatus == 'Present'
