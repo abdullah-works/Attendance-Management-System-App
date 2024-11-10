@@ -95,7 +95,8 @@ class _UserPanelState extends State<UserPanel> {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
                   border: const Border.symmetric(
                     vertical: BorderSide(color: Colors.black12),
@@ -113,8 +114,8 @@ class _UserPanelState extends State<UserPanel> {
                   children: [
                     Text(
                       (isAttendanceSubmitted)
-                          ? 'submitted successfully'
-                          : 'not submitted',
+                          ? 'Submitted Successfully'
+                          : 'Not Submitted',
                       style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -227,71 +228,75 @@ class _UserPanelState extends State<UserPanel> {
                 children: [
                   Expanded(
                     child: FilledButton(
-                      onPressed: () {
-                        if (isValueSelected == false) {
-                          ScaffoldMessenger.of(context).clearSnackBars();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'Please choose any attendance status to submit',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .labelSmall!
-                                    .copyWith(
-                                      color: Colors.white,
+                      onPressed: isAttendanceSubmitted
+                          ? null
+                          : () {
+                              if (isValueSelected == false) {
+                                ScaffoldMessenger.of(context).clearSnackBars();
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      'Please choose any attendance status to submit',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelSmall!
+                                          .copyWith(
+                                            color: Colors.white,
+                                          ),
                                     ),
-                              ),
-                            ),
-                          );
-                          return;
-                        }
-
-                        if (selectedAttendance == 'Leave') {
-                          final returnValue =
-                              defaultUserInputValidator(leaveRequestC.text);
-                          if (returnValue == null) {
-                            leaveRequestText =
-                                leaveRequestC.text.trim().replaceAll('\n', '-');
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                content: Text(
-                              returnValue,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .labelSmall!
-                                  .copyWith(
-                                    color: Colors.white,
                                   ),
-                            )));
-                            return;
-                          }
-                        }
-                        showDialog(
-                          context: context,
-                          builder: (builder) {
-                            return AlertDialog(
-                              title: const Text('Confirmation'),
-                              content: const Text(
-                                  "This can't be undone! Are you sure?"),
-                              actions: [
-                                TextButton(
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                      setState(() {
-                                        isAttendanceSubmitted = true;
-                                      });
-                                    },
-                                    child: const Text('Yes')),
-                                TextButton(
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                    child: const Text('Cancel')),
-                              ],
-                            );
-                          },
-                        );
-                      },
+                                );
+                                return;
+                              }
+
+                              if (selectedAttendance == 'Leave') {
+                                final returnValue = defaultUserInputValidator(
+                                    leaveRequestC.text);
+                                if (returnValue == null) {
+                                  leaveRequestText = leaveRequestC.text
+                                      .trim()
+                                      .replaceAll('\n', '-');
+                                } else {
+                                  ScaffoldMessenger.of(context)
+                                      .showSnackBar(SnackBar(
+                                          content: Text(
+                                    returnValue,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .labelSmall!
+                                        .copyWith(
+                                          color: Colors.white,
+                                        ),
+                                  )));
+                                  return;
+                                }
+                              }
+                              showDialog(
+                                context: context,
+                                builder: (builder) {
+                                  return AlertDialog(
+                                    title: const Text('Confirmation'),
+                                    content: const Text(
+                                        "This can't be undone! Are you sure?"),
+                                    actions: [
+                                      TextButton(
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                            setState(() {
+                                              isAttendanceSubmitted = true;
+                                            });
+                                          },
+                                          child: const Text('Yes')),
+                                      TextButton(
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                          },
+                                          child: const Text('Cancel')),
+                                    ],
+                                  );
+                                },
+                              );
+                            },
                       style: FilledButton.styleFrom(
                         visualDensity: VisualDensity.comfortable,
                         backgroundColor: Colors.green,
@@ -300,6 +305,7 @@ class _UserPanelState extends State<UserPanel> {
                           letterSpacing: 0.8,
                           fontSize: height * 0.02,
                         ),
+                        disabledBackgroundColor: Colors.white38,
                       ),
                       child: const Text('Submit'),
                       // label: Text('Submit'),
