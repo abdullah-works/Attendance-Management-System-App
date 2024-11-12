@@ -32,11 +32,61 @@ class _UserPanelState extends State<UserPanel> {
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
-    final width = MediaQuery.of(context).size.width;
-
+    final scaffoldKey = GlobalKey<ScaffoldState>();
     return Scaffold(
+      key: scaffoldKey,
       backgroundColor: const Color.fromARGB(255, 47, 46, 46),
+      drawer: SafeArea(
+        child: Drawer(
+          backgroundColor: const Color.fromARGB(255, 47, 46, 46),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 16),
+                    child: IconButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        icon: const Icon(
+                          Icons.close_rounded,
+                          color: Colors.white,
+                        )),
+                  ),
+                ],
+              ),
+              Padding(
+                padding: const EdgeInsets.all(32),
+                child: Column(
+                  children: [
+                    const CircleAvatar(
+                      radius: 56,
+                      child: FlutterLogo(
+                        size: 36,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
+                ),
+              )
+            ],
+          ),
+        ),
+      ),
       appBar: AppBar(
+        leading: IconButton.outlined(
+          onPressed: () {
+            scaffoldKey.currentState!.openDrawer();
+          },
+          icon: const Icon(
+            Icons.dehaze_rounded,
+            color: Colors.white,
+            // size: 18,
+          ),
+        ),
         backgroundColor: Colors.black87,
         title: const Text('Student Attendance'),
         centerTitle: true,
@@ -144,8 +194,7 @@ class _UserPanelState extends State<UserPanel> {
                 ),
                 child: DropdownButton(
                     dropdownColor: Colors.black87,
-                    menuWidth: width - 100,
-                    // menuMaxHeight: 100,
+                    // menuWidth: width - 100,
                     style: Theme.of(context).textTheme.titleMedium!.copyWith(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
