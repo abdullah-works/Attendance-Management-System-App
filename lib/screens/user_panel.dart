@@ -1,5 +1,7 @@
+import 'package:attendance_management_system_app/screens/login_screen.dart';
 import 'package:attendance_management_system_app/screens/user_record_screen.dart';
 import 'package:attendance_management_system_app/utility/helper_functions.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:flutter/material.dart';
 
@@ -69,6 +71,61 @@ class _UserPanelState extends State<UserPanel> {
                       ),
                     ),
                     const SizedBox(height: 24),
+                    InkWell(
+                      borderRadius: BorderRadius.circular(10),
+                      onTap: () {
+                        showDialog(
+                            context: context,
+                            builder: (builder) {
+                              return AlertDialog(
+                                title: const Text('Confirmation'),
+                                content: const Text(
+                                    "Are you sure you want to Log Out?"),
+                                actions: [
+                                  TextButton(
+                                      onPressed: () async {
+                                        await FirebaseAuth.instance.signOut();
+
+                                        if (context.mounted) {
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(const SnackBar(
+                                                  content: Text(
+                                                      'Please Log In again.')));
+                                          Navigator.of(context).pop();
+                                          Navigator.of(context).pushReplacement(
+                                              MaterialPageRoute(
+                                                  builder: (context) {
+                                            return const LoginScreen();
+                                          }));
+                                        }
+                                      },
+                                      child: const Text('Yes')),
+                                  TextButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                      child: const Text('Cancel')),
+                                ],
+                              );
+                            });
+                      },
+                      child: const Row(
+                        children: [
+                          IconButton(
+                            enableFeedback: false,
+                            onPressed: null,
+                            disabledColor: Colors.white,
+                            icon: Icon(Icons.logout_rounded),
+                            color: Colors.white,
+                          ),
+                          SizedBox(width: 16),
+                          Text(
+                            'Log Out',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               )
