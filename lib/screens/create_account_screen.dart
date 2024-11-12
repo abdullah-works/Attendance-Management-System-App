@@ -1,5 +1,4 @@
 import 'package:attendance_management_system_app/screens/login_screen.dart';
-import 'package:attendance_management_system_app/screens/user_panel.dart';
 import 'package:attendance_management_system_app/utility/helper_functions.dart';
 import 'package:attendance_management_system_app/widgets/email_input_field.dart';
 import 'package:attendance_management_system_app/widgets/password_input_field.dart';
@@ -153,22 +152,25 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final height = MediaQuery.of(context).size.height;
     return Scaffold(
       backgroundColor: Colors.black87,
       appBar: AppBar(
-        backgroundColor: Colors.white.withOpacity(0.2),
+        // backgroundColor: Colors.white.withOpacity(0.2),
+        backgroundColor: Colors.white.withOpacity(0.12),
         centerTitle: true,
         titleSpacing: 30,
-        bottom: const PreferredSize(
-          preferredSize: Size.fromHeight(36),
-          child: Center(
-            heightFactor: 2,
+        bottom: PreferredSize(
+          preferredSize: Size.fromHeight(height * 0.055),
+          child: Padding(
+            padding: EdgeInsets.only(bottom: height * 0.025),
+            // heightFactor: 2,
             child: Text(
               'CREATE ACCOUNT',
               style: TextStyle(
-                fontWeight: FontWeight.w100,
+                fontWeight: FontWeight.bold,
                 color: Colors.white,
-                fontSize: 24,
+                fontSize: height * 0.03,
                 letterSpacing: 2,
                 wordSpacing: 4,
               ),
@@ -188,39 +190,44 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                     margin: const EdgeInsets.only(top: 24),
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                        color: Colors.black87,
-                        borderRadius: BorderRadius.circular(4),
-                        boxShadow: const [
-                          BoxShadow(color: Colors.white, blurRadius: 2)
-                        ]),
+                      color: Colors.white12,
+                      borderRadius: BorderRadius.circular(4),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Colors.black45,
+                          blurStyle: BlurStyle.inner,
+                          blurRadius: 6,
+                        )
+                      ],
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        const Text(
+                        Text(
                           'My Details',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            fontSize: 16.0,
+                            fontSize: height * 0.02,
                             color: Colors.white,
                             letterSpacing: 2,
                           ),
                           textAlign: TextAlign.left,
                         ),
-                        const SizedBox(height: 20.0),
+                        SizedBox(height: height * 0.02),
                         nameInputWidget,
-                        const SizedBox(height: 16.0),
+                        SizedBox(height: height * 0.01),
                         EmailInputField(controller: emailC),
-                        const SizedBox(height: 16.0),
+                        SizedBox(height: height * 0.02),
                         Text(
                           'Password - minimum 8 characters, should be a combination of (letters & numbers)',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            fontSize: 15.0,
+                            fontSize: height * 0.02,
                             color: Colors.white.withOpacity(0.8),
                           ),
                           textAlign: TextAlign.left,
                         ),
-                        const SizedBox(height: 16.0),
+                        SizedBox(height: height * 0.01),
                         PasswordInputField(
                           controller: passC,
                           obscureText: passHidden,
@@ -230,13 +237,13 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                             });
                           },
                         ),
-                        const SizedBox(height: 16.0),
+                        SizedBox(height: height * 0.01),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 48),
+                  SizedBox(height: height * 0.05),
                   TextButton(
-                    onPressed: () async {
+                    onPressed: () {
                       if (formKey.currentState!.validate()) {
                         createUserAccount(context);
                       }
@@ -264,14 +271,15 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text(
+                      Text(
                         'Already Registered? Log in  ',
                         style: TextStyle(
                           color: Colors.white,
+                          fontSize: height * 0.018,
                         ),
                       ),
                       SizedBox(
-                        height: 24,
+                        height: height * 0.03,
                         child: TextButton(
                           onPressed: () {
                             ScaffoldMessenger.of(context)
@@ -283,19 +291,18 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                           },
                           iconAlignment: IconAlignment.end,
                           style: TextButton.styleFrom(
-                            alignment: Alignment.centerLeft,
-                            backgroundColor: Colors.black54,
-                            elevation: 1,
-                            shadowColor: Colors.white30,
-                            // padding: EdgeInsets.only(left: 16)
-                          ),
+                              // alignment: Alignment.centerLeft,
+                              backgroundColor: Colors.black54,
+                              elevation: 1,
+                              shadowColor: Colors.white30,
+                              padding: const EdgeInsets.all(0)),
                           child: Text(
                             'here',
                             style: TextStyle(
                               color: Colors.white.withOpacity(0.8),
                               fontWeight: FontWeight.bold,
                               letterSpacing: 1.2,
-                              fontSize: 13,
+                              fontSize: height * 0.018,
                             ),
                           ),
                         ),
