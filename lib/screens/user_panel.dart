@@ -4,6 +4,7 @@ import 'package:attendance_management_system_app/utility/helper_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class UserPanel extends StatefulWidget {
   const UserPanel({super.key});
@@ -18,6 +19,27 @@ class _UserPanelState extends State<UserPanel> {
   bool isValueSelected = false;
   bool isAttendanceSubmitted = false;
   late TextEditingController leaveRequestC;
+
+  Future<bool> userLogOut(context) async {
+    showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (builder) {
+          return const PopScope(
+              child: SpinKitPulse(
+            color: Colors.white,
+          ));
+        });
+    final isConnected = await checkInternetConnection(context);
+
+    if (!isConnected) {
+      Navigator.of(context).pop();
+      return false;
+    }
+
+    await FirebaseAuth.instance.signOut();
+    return true;
+  }
 
   @override
   void initState() {
@@ -84,7 +106,13 @@ class _UserPanelState extends State<UserPanel> {
                                 actions: [
                                   TextButton(
                                       onPressed: () async {
-                                        await FirebaseAuth.instance.signOut();
+                                        Navigator.of(context).pop();
+                                        final loggedOut =
+                                            await userLogOut(context);
+
+                                        if (!loggedOut) {
+                                          return;
+                                        }
 
                                         if (context.mounted) {
                                           ScaffoldMessenger.of(context)
@@ -134,6 +162,7 @@ class _UserPanelState extends State<UserPanel> {
         ),
       ),
       appBar: AppBar(
+        forceMaterialTransparency: true,
         leading: IconButton.outlined(
           onPressed: () {
             scaffoldKey.currentState!.openDrawer();
@@ -144,7 +173,7 @@ class _UserPanelState extends State<UserPanel> {
             // size: 18,
           ),
         ),
-        backgroundColor: Colors.black87,
+        // backgroundColor: Colors.black87,
         title: const Text('Student Attendance'),
         centerTitle: true,
         titleTextStyle: Theme.of(context).textTheme.titleLarge!.copyWith(
@@ -457,12 +486,18 @@ class _UserPanelState extends State<UserPanel> {
                         return const UserRecordScreen();
                       }));
                     },
-                    label: const Text('show my record'),
-                    icon: const Icon(Icons.navigate_next),
+                    label: const Text(
+                      'show my record',
+                      style: TextStyle(color: Colors.black87),
+                    ),
+                    icon: const Icon(
+                      Icons.arrow_forward_rounded,
+                      size: 22,
+                      color: Colors.black87,
+                    ),
                     iconAlignment: IconAlignment.end,
                     style: ElevatedButton.styleFrom(
                       textStyle: TextStyle(
-                        color: Colors.black,
                         fontWeight: FontWeight.bold,
                         fontSize: height * 0.02,
                       ),
