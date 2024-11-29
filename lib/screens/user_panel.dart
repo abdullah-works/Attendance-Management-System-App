@@ -1,7 +1,9 @@
 import 'package:attendance_management_system_app/screens/login_screen.dart';
 import 'package:attendance_management_system_app/screens/user_record_screen.dart';
 import 'package:attendance_management_system_app/utility/helper_functions.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:uuid/uuid.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -14,11 +16,16 @@ class UserPanel extends StatefulWidget {
 }
 
 class _UserPanelState extends State<UserPanel> {
+  FirebaseAuth firebaseAuth = FirebaseAuth.instance;
+  FirebaseFirestore firebaseFirestore = FirebaseFirestore.instance;
+  final uuid = const Uuid();
+
   String? selectedAttendance;
   String? leaveRequestText;
   bool isValueSelected = false;
   bool isAttendanceSubmitted = false;
   late TextEditingController leaveRequestC;
+  final scaffoldKey = GlobalKey<ScaffoldState>();
 
   Future<bool> userLogOut(context) async {
     showDialog(
@@ -41,6 +48,64 @@ class _UserPanelState extends State<UserPanel> {
     return true;
   }
 
+  void submitAttendance(context) async {
+    showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (builder) {
+          return const PopScope(
+              child: SpinKitPulse(
+            color: Colors.white,
+          ));
+        });
+    final isConnected = await checkInternetConnection(context);
+
+    if (!isConnected) {
+      // Navigator.of(context).pop();
+      return;
+    }
+
+    selectedAttendance =
+        selectedAttendance == 'Leave' ? 'Pending' : selectedAttendance;
+
+    final currentDate = Timestamp.now();
+
+        try {
+      final userId = firebaseAuth.currentUser!.uid;
+      final attendanceId = uuid.v4().toString();
+
+      await firebaseFirestore
+          .collection('users')
+          .doc(userId)
+          .collection('attendance')
+          .doc(attendanceId)
+          .set(
+        {
+          'id': attendanceId,
+          'date': currentDate,
+          'attendanceStatus': selectedAttendance,
+          'isLeaveAccepted': null,
+          'leaveRequest': leaveRequestText,
+        },
+      );
+    } on FirebaseException catch (error) {
+      if (mounted) {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Error: $error')));
+      }
+      return;
+    }
+    if (mounted) {
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Success! Your attendance is marked.')));
+    }
+    setState(() {
+      isAttendanceSubmitted = true;
+    });
+  }
+
   @override
   void initState() {
     leaveRequestC = TextEditingController();
@@ -56,7 +121,6 @@ class _UserPanelState extends State<UserPanel> {
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
-    final scaffoldKey = GlobalKey<ScaffoldState>();
     return Scaffold(
       key: scaffoldKey,
       backgroundColor: const Color.fromARGB(255, 47, 46, 46),
@@ -188,6 +252,7 @@ class _UserPanelState extends State<UserPanel> {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
               const SizedBox(height: 16),
               Center(
@@ -417,9 +482,7 @@ class _UserPanelState extends State<UserPanel> {
                                       TextButton(
                                           onPressed: () {
                                             Navigator.of(context).pop();
-                                            setState(() {
-                                              isAttendanceSubmitted = true;
-                                            });
+                                            submitAttendance(context);
                                           },
                                           child: const Text('Yes')),
                                       TextButton(
